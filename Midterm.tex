@@ -1,0 +1,497 @@
+% quantum macros
+
+\def\01{\{0,1\}}
+\def\eps{\epsilon}
+\newcommand{\half}{{\frac{1}{2}}}
+\newcommand{\set}[1]{{\left\{#1\right\}}}
+\newcommand{\ksubsets}{{n \choose k}}
+\newcommand{\jsubsets}{{n \choose j}}
+\newcommand{\Prob}{{\mathbf{Pr}}}
+\newcommand{\tinyspace}{\mspace{1mu}}
+\newcommand{\microspace}{\mspace{0.5mu}}
+\newcommand{\op}[1]{\operatorname{#1}}
+
+\newcommand{\norm}[1]{\left\lVert\tinyspace#1\tinyspace\right\rVert}
+\newcommand{\snorm}[1]{\lVert\tinyspace#1\tinyspace\rVert}
+\newcommand{\abs}[1]{\left\lvert\tinyspace #1 \tinyspace\right\rvert}
+\newcommand{\ceil}[1]{\left\lceil #1 \right\rceil}
+\newcommand{\floor}[1]{\left\lfloor #1 \right\rfloor}
+\def\iso{\cong}
+\newcommand{\defeq}{\stackrel{\smash{\text{\tiny def}}}{=}}
+\newcommand{\tr}{\operatorname{tr}}
+\newcommand{\rank}{\operatorname{rank}}
+\renewcommand{\det}{\operatorname{Det}}
+\newcommand{\im}{\operatorname{Im}}
+\renewcommand{\t}{{\scriptscriptstyle\mathsf{T}}}
+\newcommand{\ip}[2]{\left\langle #1 , #2\right\rangle}
+\newcommand{\ipp}[1]{\left\langle #1 \right\rangle}
+\newcommand{\sip}[2]{\langle #1 | #2\rangle}
+
+\def\({\left(}
+\def\){\right)}
+\def\I{\mathsf{id}}
+
+\newcommand{\fid}{\operatorname{F}}
+\newcommand{\setft}[1]{\mathrm{#1}}
+\newcommand{\lin}[1]{\setft{L}\left(#1\right)}
+\newcommand{\density}[1]{\setft{Dens}\left(#1\right)}
+\newcommand{\unitary}[1]{\setft{U}\left(#1\right)}
+\newcommand{\trans}[1]{\setft{T}\left(#1\right)}
+\newcommand{\herm}[1]{\setft{Herm}\left(#1\right)}
+\newcommand{\pos}[1]{\setft{Pos}\left(#1\right)}
+\newcommand{\pd}[1]{\setft{Pd}\left(#1\right)}
+\newcommand{\sphere}[1]{\mathcal{S}\!\left(#1\right)}
+\newcommand{\opset}[3]{\setft{#1}_{#2}\!\left(#3\right)}
+\newcommand{\ot}{\otimes}
+
+\def\complex{\mathbb{C}}
+\def\real{\mathbb{R}}
+\def\natural{\mathbb{N}}
+\def\integer{\mathbb{Z}}
+
+\def\<{\langle}
+\def\>{\rangle}
+\def \lket {\left|}
+\def \rket {\right\rangle}
+\def \lbra {\left\langle}
+\def \rbra {\right|}
+\newcommand{\ket}[1]{\lket\microspace #1 \microspace\rket}
+\newcommand{\bra}[1]{\lbra\microspace #1 \microspace\rbra}
+\newcommand{\ketbra}[1]{\lket\microspace #1 \rangle \langle #1 \microspace\rbra}
+
+
+\def\X{\mathcal{X}}
+\def\Y{\mathcal{Y}}
+\def\Z{\mathcal{Z}}
+\def\W{\mathcal{W}}
+\def\A{\mathcal{A}}
+\def\B{\mathcal{B}}
+\def\V{\mathcal{V}}
+\def\U{\mathcal{U}}
+\def\C{\mathcal{C}}
+\def\D{\mathcal{D}}
+\def\H{\mathcal{H}}
+\def\E{\mathcal{E}}
+\def\F{\mathcal{F}}
+\def\M{\mathcal{M}}
+\def\R{\mathcal{R}}
+\def\P{\mathcal{P}}
+\def\Q{\mathcal{Q}}
+\def\S{\mathcal{S}}
+\def\T{\mathcal{T}}
+\def\K{\mathcal{K}}
+\def\yes{\text{yes}}
+\def\no{\text{no}}
+\def\onevec{\vec{\mathbf{1}}}
+
+\newcommand{\trnorm}[1]{\norm{#1}_{\tr}}
+\newcommand{\trnormb}[1]{{\big\| #1 \big\|}_{\rm tr}}
+\newcommand{\trdist}[1]{ \left | #1 \right |_{\rm tr}}
+\newcommand{\uniform}[1]{\mathcal{U}_{#1}}
+
+\def\defeq{\stackrel{\small \textrm{def}}{=}}
+
+
+%You can leave alone everything before Line 84.
+\documentclass{article}
+\usepackage{url,amsfonts, amsmath, amssymb, amsthm}
+% Page layout
+\setlength{\textheight}{8.75in}
+\setlength{\columnsep}{2.0pc}
+\setlength{\textwidth}{6.5in}
+\setlength{\topmargin}{0in}
+\setlength{\headheight}{0.0in}
+\setlength{\headsep}{0.0in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+\setlength{\parindent}{1pc}
+\newcommand{\shortbar}{\begin{center}\rule{5ex}{0.1pt}\end{center}}
+%\renewcommand{\baselinestretch}{1.1}
+% Macros for course info
+\newcommand{\courseNumber}{CIS 410/510}
+\newcommand{\courseTitle}{Introduction to Quantum Information Theory}
+\newcommand{\semester}{Spring 2016}
+% Theorem-like structures are numbered within SECTION units
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{statement}[theorem]{Statement}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{fact}{Fact}
+%definition style
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}{Example}
+%\newtheorem{problem}{Problem}
+\newtheorem{exercise}{Exercise}
+\newtheorem{algorithm}{Algorithm}
+%remark style
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{reduction}[theorem]{Reduction}
+%\newtheorem{question}[theorem]{Question}
+\newtheorem{question}{Question}
+%\newtheorem{claim}[theorem]{Claim}
+%
+% Proof-making commands and environments
+\newcommand{\beginproof}{\medskip\noindent{\bf Proof.~}}
+\newcommand{\beginproofof}[1]{\medskip\noindent{\bf Proof of #1.~}}
+\newcommand{\finishproof}{\hspace{0.2ex}\rule{1ex}{1ex}}
+\newenvironment{problem}[1]{\medskip\noindent{\bf Problem #1.~}}{\shortbar}
+\newenvironment{solution}[1]{\medskip\noindent{\bf Solution #1.~}}{\shortbar}
+%====header======
+\newcommand{\solutions}[3]{
+%\renewcommand{\thesolution}{{\large #2}.\arabic{problem}}
+\vspace{-2ex}
+\begin{center}
+{\small  \courseNumber, \courseTitle
+\hfill {\large \bf {Due: #1} }\\
+\semester, University of Oregon \hfill
+{\em Date: #3}}\\
+\vspace{-1ex}
+\hrulefill\\
+\vspace{4ex}
+{\Large #2}\\
+\vspace{2ex}
+\end{center}
+\shortbar
+\vspace{3ex}
+}
+
+\begin{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\solutions{May 13th, 2016}{Midterm}{\today}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Begin the solution for each problem by
+% \begin{solution}{Problem Number} and ends it with \end{solution}
+%
+% the solution for Problem 1
+
+
+$$$$Raleigh Foster, Dustin Reid$$$$
+
+\section{Outline}
+
+We have done work in programming in quantum programming languages,
+and studying quantum lambda calculi.
+
+
+
+\section{Programming in Quantum Programming Languages}
+
+We have implemented Deutsch's algorithm on a single Qubit.
+We also tried scaling up their implementation of Shor's algorithm.
+Factorizing 1023 (10 qubits) took 1 hour 8 minutes.
+
+We can do more performance tests later if desired.
+
+For our final, we will probably also be implementing other algorithms.
+
+Below is the code for Deutsch's algorithm on a single Qubit.
+
+\begin{verbatim}
+
+
+// Copyright (c) 2015,2016 Microsoft Corporation
+//#indent "off"
+
+#if INTERACTIVE
+#r @"..\bin\Liquid1.dll"
+#else
+namespace Microsoft.Research.Liquid // Tell the compiler our namespace
+#endif
+
+open System                         // Open any support libraries
+
+open Microsoft.Research.Liquid      // Get necessary Liquid libraries
+open Util                           // General utilites
+open Operations                     // Basic gates and operations
+//open Microsoft.FSharp.Collections.Seq
+
+// Show elapsed times
+type QubitTimer() =
+    let sw  =
+        let sw  = Diagnostics.Stopwatch()
+        show ""
+        show "%8s %8s %8s %s" "Secs/Op" "S/Qubit" "Mem(GB)" "Operation"
+        show "%8s %8s %8s %s" "-------" "-------" "-------" "---------"
+        sw.Restart()
+        sw
+
+    member x.Show(str:string,?i:int,?reset:bool) =
+        let i           = defaultArg i 1
+        let reset       = defaultArg reset true
+        let ps          = procStats(false)
+        let secs        = float sw.ElapsedMilliseconds / 1000.0
+        let spi         = secs / float i
+        show "%8.3f %8.3f %8.3f %s" secs spi (float ps.privMB / 1024.) str
+        if reset then sw.Restart()
+
+
+
+
+module Script =                     // The script module allows for incremental loading
+
+
+    // Possible functions on 1 bit
+    let f0 (n:int) = 
+        if n = 0 then 0
+        else 0
+
+    let f1 (n:int) = 
+        if n = 0 then 0
+        else 1
+
+    let f2 (n:int) = 
+        if n = 0 then 1
+        else 0
+
+    let f3 (n:int) = 
+        if n = 0 then 1
+        else 1
+
+    //This is a gate definition for Uf. 
+    let Uf (qs:Qubits) f = 
+        if (f 0) = 0 && (f 1) = 0 then 
+            I qs
+        elif (f 0) = 0 && (f 1) = 1 then
+            CNOT qs
+        elif (f 0) = 1 && (f 1) = 0 then           
+            let gate = 
+                new Gate(
+                    Name = "Uf",
+                    Help = "Unitary to apply a function f",
+                    Mat = ( CSMat(4, [(0,1,1.,0.); (1,0,1.,0.);
+                                            (2,2,1.,0.); (3,3,1.,0.)])),
+                    Draw = "\\ctrl{#1}\\go[#1]\\targ"
+                    )
+            gate.Run qs
+        elif (f 0) = 1 && (f 1) = 1 then
+            let gate = 
+                new Gate(
+                    Name = "Uf",
+                    Help = "Unitary to apply a function f",
+                    Mat = ( CSMat(4, [(0,1,1.,0.); (1,0,1.,0.);
+                                            (3,2,1.,0.); (2,3,1.,0.)])),
+                    Draw = "\\ctrl{#1}\\go[#1]\\targ"
+                    )
+            gate.Run qs
+   
+
+    [<LQD>]
+    let deutsch() =
+        logOpen "deutsch_test.log" false
+      
+        let qt = QubitTimer()
+        
+        //Create a 2 qubit vector
+        let ket = Ket(2)
+        qt.Show "Created 2 qubits"
+        
+        //Get list of qubits in the vector
+        let qs = ket.Qubits
+
+        //Initialize second qubit to 1
+        (ket.Item 1).StateSet(0.,0.,1.,0.)
+
+        //The >< operator applies the hadamard gate to all qubits in the list qs
+        H >< qs
+        qt.Show("Step 1 - Hadamard both qubits", qs.Length)
+        for q in qs do show "q[%d]=it equals%s" q.Id (q.ToString())
+
+        //Apply the oracle for the function f 
+        //Pass f0, f1, f2, or f3 to test different functions
+        Uf qs f2
+
+        qt.Show("Step 2 - Apply Uf", qs.Length)
+        for q in qs do show "q[%d]=it equals%s" q.Id (q.ToString())
+
+        qt.Show("Step 3 - Apply hadamard to first qubit")
+        H qs
+        for q in qs do show "q[%d]=it equals%s" q.Id (q.ToString())
+        
+        qt.Show("Step 4 - Measure first qubit")
+        M qs
+
+        for q in qs do show "q[%d]=it equals%s" q.Id (q.ToString())
+
+    [<LQD>]
+    let Entangle1(entSiz:int) =
+        logOpen "Liquid.log" false
+
+        let qt      = QubitTimer()
+
+        let ket     = Ket(entSiz)                           // Start with a full sized state vector
+        let _       = ket.Single()
+        qt.Show "Created single state vector"
+
+        let qs      = ket.Qubits
+        H qs                                                // Hadamard the first qubit
+        qt.Show "Did Hadamard"
+
+        let q0  = qs.Head
+        for i in 1..qs.Length-1 do
+            let q   = qs.[i]
+            CNOT[q0;q]                                      // Entangle all the other qubits
+            let str = sprintf "  Did CNOT: %2d" i
+            qt.Show(str,i,(i=qs.Length-1))
+
+        M >< qs                                             // Measure all the qubits
+        qt.Show("Did Measure",qs.Length)
+        show ""
+
+    [<LQD>]
+    let Entangle2(entSiz:int) =
+        let ops (qs:Qubits) =
+            H qs
+            let q0  = qs.Head
+            for i in 1..qs.Length-1 do CNOT !!(qs,0,i)
+            M >< qs                                         // Measure all the qubits
+
+        let ket     = Ket(entSiz)                           // Start with a full sized state vector
+        let _       = ket.Single()
+        let qs      = ket.Qubits
+
+        let qt      = QubitTimer()
+        ops qs
+        qt.Show "Straight function calls"
+
+        let qs      = ket.Reset(entSiz)
+        let _       = ket.Single()
+        let circ    = Circuit.Compile ops qs
+        qt.Show "Compile cost"
+        circ.Run qs
+        qt.Show "Compiled circuit run time"
+
+        let qs      = ket.Reset(entSiz)
+        let _       = ket.Single()
+        let circ2   = circ.GrowGates(ket)
+        qt.Show "Optimization cost"
+        circ2.Run qs
+        qt.Show "Optimized circuit run time"
+
+        show "Circuit dump (in Liquid.log):"
+        circ.Dump(showLogInd)
+        show "Optimized circuit:"
+        circ2.Dump(showLogInd)
+
+        circ.Fold().RenderHT("Entangle2raw")
+        circ2.Fold().RenderHT("Entangle2opt")
+
+#if INTERACTIVE
+do
+    Script.Entangle1(10)        // If interactive, then run the routine automatically
+    Script.Entangle2(10)
+#endif
+
+\end{verbatim}
+
+
+
+\section{Quantum Programming Language Theory}
+
+
+
+
+Preface and Overview of classical lambda calculi:
+$$$$
+
+We assume that the reader is familiar with basic formulation of lambda calculi as variables, abstractions, and applications,
+as well as the concept of a reduction strategy, and a value. Instead we wish to focus on the differences between lambda calculi, and what makes the quantum lambda calculus interesting or different.
+
+In the classical setting, various lambda calculi exist with different type systems.
+
+These can be divided into the untyped lambda calculus, and a large number of important typed lambda calculi.
+
+The untyped lambda calculus is Turing complete: we can provide encodings of objects we care about in the form of terms in the untyped lambda calculus,
+and the computational power of the untyped lambda calculus allows us to map inputs to outputs in terms of these encodings in arbitrary computable ways.
+
+The problem with using untyped lambda calculi for computation lies in the great number of terms for which we cannot attach computational meaning, as well as the difficulty in reasoning about the behavior of programs, such as determining if they output a value of the form we are interested in.
+Typed lambda calculi, the basis for typed programming languages, address this by providing a mechanism for rejecting certain programs which have undesirable properties, the most common of which being terminating computation in a term which does not correspond to a valid output of the program.
+
+Type systems in general can do even more, and can verify more or less arbitrary properties of programs.
+
+This is useful for the purpose of verifying the correctness of code, and for generation of code from a specification.
+This is closely tied to applications in universal artificial intelligence and other important fields.
+
+We are, however, limited by Rice's Theorem, so type systems cannot decidably differentiate arbitrary properties with certainty.
+
+The type systems in the classical case therefore typically tackle this problem from two directions.
+
+Either they start with a total language, which has only terminating programs, and then add functionality to increase the amount of computable functions in the language, or they start with a Turing complete language, and then add limitations on programs to reject more and more invalid programs.
+
+In extreme cases, languages push the limits on Rice's theorem by allowing the programmer to assist the compiler in type checking programs by providing proofs that they are of the correct type.
+
+
+We are interested in how this pictures relates to the quantum case.
+Before attempting to study quantum lambda calculi, however, we need to have a model of the untyped quantum lambda calculus.
+
+$$$$
+
+Quantum Lambda Calculus.
+
+$$$$
+
+This is the main theoretical work for this report.
+We focused on the paper "A Lambda Calculus for Quantum Computation" for this,
+It is possible that there are other ways of creating an untyped quantum lambda calculus.
+We found this presentation to be rather elegant.
+When creating the quantum untyped lambda calculus from the previous section, we must satisfy many properties, including: 
+$$$$
+Our quantum untyped lambda calculus:
+$$$$
+1) should be Turing complete.$$$$
+2) should resemble as closely as possible the classical untyped lambda calculus.$$$$
+3) should have a universal set of quantum primitives in order to perform optimal quantum computation$$$$
+4) should maintain invertibility of quantum computation.$$$$
+5) should not terminate in a superposition that isn't properly normalized$$$$
+$$$$
+
+There are a few more technical properties as well.
+
+
+To see how this is done, we take a similar approach to the paper, starting with the classical untyped lambda calculus and then showing how to modify the calculus to satisfy the above properties.
+The paper has a lot of proofs for how these properties are satisfied, but we will simply provide an informal explanation.
+
+
+Since we start with the classical untyped lambda calculus, property 1 is satisfied, and while 2 is subjective it appears to be reasonably satisfied as well.
+To achieve (3), we add any universal set of quantum primitives. For instance, the paper we examine suggests Rotation by $\pi/8$, H, and CNot.
+
+To achieve (4), every small-step in our computation consists in
+transforming lambda expression "h1; h2; ... hn; x" to "h1; h2; ... hn; x ; y" where y is the term we would obtain under standard reduction of x.
+That is, in addition to normalizing terms as we typically do in lambda calculus, we generate product states that repeatedly append lambda terms to represent the entire history of computation.
+
+Thus $\ket{H 0}$ becomes $1/\sqrt{2} (\ket{H 0; 0} + \ket{H 0; 1})$
+
+
+Note that we now have invertibility, but adding histories causes problems with cancellation of terms with different histories.
+
+In particular, computing  $\ket{H (H 0)}$ does not result in 0. The issue when computing this value, is that we cannot cancel a term with H 1 in its history with one that has H 0 in the same position in its history. To fix this problem, a rather deep result is that the super position doesn't affect the structure of the computation: If we replace all 0 and 1 kets in the history with underscores, everything factors nicely, and $\ket{H (H 0)}$ evaluates to 0. The amazing thing about this is that everything is still invertible!
+$$$$
+
+The above represents the core ideas that allow the quantum lambda calculus to work.
+What remains is to introduce the idea of linearity. This is rather similar to classical case of linear logic, and I expect I may cover it again when examining the typed quantum lambda calculi (in particular, quantum logic is supposed to be similar to linear logic), so coverage here will brief. We need a mechanism for specifying which terms are linear, meaning they must be used exactly once, and which are non-linear, or classical, meaning they can be copied or discarded at will. We allow for terms to be linear or non-linear, and we allow for the argument to lambda abstractions to be linear or non-linear. What remains is a lot of technical details to show that linear terms aren't promoted to non-linear terms when they should not be. While some of this is interesting it's mostly tedious, so I will save any further coverage of linearity for later.
+
+
+Plan for the final:
+
+We have seen how the untyped classical lambda calculus can be translated into an untyped quantum lambda calculus.
+This is however, an extremely small result. What is really interesting is not that quantum computation can be formulated in terms of lambda calculi,
+but that we can create type systems for quantum lambda calculi.
+
+This is what will allow us ultimately (though far outside the scope of this project) to verify properties of quantum programs, and to search the space of quantum programs.
+
+$$$$
+Curry Howard Correspondence
+$$$$
+The curry howard correspondence is a relationship between logic and typed lambda calculi.
+In particular therefore, we are interested in quantum logic.
+Quantum logic is related to linear logic, so linear logic may come up in the final presentation due to its indirect connection to quantum type systems.
+
+
+
+
+\end{document}
