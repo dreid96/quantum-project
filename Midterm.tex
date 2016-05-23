@@ -160,6 +160,36 @@
 \vspace{3ex}
 }
 
+\usepackage{listings}
+\usepackage{color}
+\usepackage{graphicx}
+
+\definecolor{bluekeywords}{rgb}{0.13,0.13,1}
+\definecolor{greencomments}{rgb}{0,0.5,0}
+\definecolor{turqusnumbers}{rgb}{0.17,0.57,0.69}
+\definecolor{redstrings}{rgb}{0.5,0,0}
+
+\lstdefinelanguage{FSharp}
+{
+	morekeywords={let,new,match,with,rec,open,module,namespace,type,of,member,and,for,in,do,begin,end,fun,function,try,mutable,if,then,else,\\[<LQD>\\],elif},
+	keywordstyle=\color{bluekeywords},
+	sensitive=false,
+	morecomment=[l][\color{greencomments}]{///},
+	morecomment=[l][\color{greencomments}]{//},
+	morecomment=[s][\color{greencomments}]{{(*}{*)}},
+	morestring=[b]",
+	stringstyle=\color{redstrings}
+}
+
+\lstset{
+	language=FSharp,
+	basicstyle=\ttfamily,
+	breaklines=true,
+	columns=fullflexible,
+	showstringspaces=false
+}
+
+
 \begin{document}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \solutions{May 13th, 2016}{Midterm}{\today}
@@ -180,216 +210,151 @@ and studying quantum lambda calculi.
 
 
 
-\section{Programming in Quantum Programming Languages}
+\section{Quantum Programming with Microsoft Liquid}
 
-We have implemented Deutsch's algorithm on a single Qubit.
-We also tried scaling up their implementation of Shor's algorithm.
-Factorizing 1023 (10 qubits) took 1 hour 8 minutes.
+\subsection{Overview}
+We have implemented Deutsch's algorithm on a single Qubit. We also tried scaling
+up their implementation of Shor's algorithm. Factoring 1023 (10 qubits) took 1
+hour 8 minutes. We can do more performance tests later if desired. For our final,
+we will probably also be implementing other algorithms. \\ \\
 
-We can do more performance tests later if desired.
+\subsection{Implementing Deutch's Algorithm}
+First, for convenience, we define each possible function $f : \{0,1\} \rightarrow \{0,1\}$.
+This will make testing our implementation for each $f$ easy to manage. For simplicity our functions
+map from $\{0,1\} \rightarrow \{true,false\}$, this does not affect the simulation.
 
-For our final, we will probably also be implementing other algorithms.
+\begin{lstlisting}
+	let f0 (n:int) = false
 
-Below is the code for Deutsch's algorithm on a single Qubit.
+    let f1 (n:int) = not (n = 0)
 
-\begin{verbatim}
+    let f2 (n:int) = (n = 0)
 
-
-// Copyright (c) 2015,2016 Microsoft Corporation
-//#indent "off"
-
-#if INTERACTIVE
-#r @"..\bin\Liquid1.dll"
-#else
-namespace Microsoft.Research.Liquid // Tell the compiler our namespace
-#endif
-
-open System                         // Open any support libraries
-
-open Microsoft.Research.Liquid      // Get necessary Liquid libraries
-open Util                           // General utilites
-open Operations                     // Basic gates and operations
-//open Microsoft.FSharp.Collections.Seq
-
-// Show elapsed times
-type QubitTimer() =
-    let sw  =
-        let sw  = Diagnostics.Stopwatch()
-        show ""
-        show "%8s %8s %8s %s" "Secs/Op" "S/Qubit" "Mem(GB)" "Operation"
-        show "%8s %8s %8s %s" "-------" "-------" "-------" "---------"
-        sw.Restart()
-        sw
-
-    member x.Show(str:string,?i:int,?reset:bool) =
-        let i           = defaultArg i 1
-        let reset       = defaultArg reset true
-        let ps          = procStats(false)
-        let secs        = float sw.ElapsedMilliseconds / 1000.0
-        let spi         = secs / float i
-        show "%8.3f %8.3f %8.3f %s" secs spi (float ps.privMB / 1024.) str
-        if reset then sw.Restart()
+    let f3 (n:int) = true
+\end{lstlisting}
 
 
+\pagebreak
+
+Next, an oracle for the unitary $U_f$ acting on two qubits is defined. In Liquid, unitary gates
+are defined as functions which take qubit lists as arguments. We need $U_f \ket{x}\ket{y}
+= \ket{x}\ket{y \oplus f(x)}$, for any $f : \{0,1\} \rightarrow \{0,1\}$. Of course, the actual entries of $U_f$ are dependant on the
+function $f$. \\ \\
+For this reason, we have defined $U_f$ as function which takes not only a qubit list, but a function $f$ as well.
+The values of $f(0)$ and $f(1)$ are determined, and then the corresponding unitary operator is contrsucted. In the cases
+where $f(0) = f(1) = 0$ and $f(0) = 0$, and $f(1) = 1$, the built-in Identity and CNOT gates are used respectively.
+Otherwise, new gates must be defined.
+
+\begin{lstlisting}
+    let Uf (qs:Qubits) f =  let (x, y) = ((f 0), (f 1))
+                            match (x, y) with
+                                | (false, false) -> I qs
+                                | (false, true) -> CNOT qs
+                                | (true, false) ->
+                                    let gate =
+                                        new Gate(
+                                                Mat = ( CSMat(4, [(0,1,1.,0.); (1,0,1.,0.);
+                                                                (2,2,1.,0.); (3,3,1.,0.)])),
+                                                )
+                                    gate.Run qs
+                                | (true, true) ->
+                                    let gate =
+                                        new Gate(
+                                                Mat = ( CSMat(4, [(0,1,1.,0.); (1,0,1.,0.);
+                                                                (3,2,1.,0.); (2,3,1.,0.)])),
+                                                )
+                                    gate.Run qs
+\end{lstlisting}
+
+Our method of defining $U_f$ is not scalable for the general case of the Deutsch-Jozsa algorithm where the
+function $f$ is not limited to 1 bit, i.e. $f: \{0,1\}^n \rightarrow \{0,1\}$. For $n$ bits,
+there are $2^\{2^n\}$ possible functions $f: \{0,1\}^n \rightarrow \{0,1\}$.
+The desired oracle $U_f$ must map $\ket{x}\ket{y}$ to $\ket{x}\ket{y \oplus f(x)}$. If we applied
+our current method to the general case, this would require matching all $2^\{2^n\}$ cases of $f$,
+to build the corresponding $U_f$. \\
 
 
-module Script =                     // The script module allows for incremental loading
+Determining the phase "kickback" effect of a unitary $U_f$ for a given function $f$
+could provide an easier implementation. Considering the case where $U_f\ket{x}\ket{y}$ = $\ket{x}\ket{y \oplus f(x)}$,
+we could just loop through the $2^n$ possible input states $\ket{x}$, calculate $f(x)$ for each $\ket{x}$, and then
+multiply the amplitude of $\ket{x}$ by $(-1)^{f(x)}$. Liquid unfortunately does not provide any convenient method for
+setting arbitrary amplitudes in a multi-qubit state vector. Amplitudes can only be set for individual qubits. However, this
+cannot work for cases where $U_f$ produces an entangled state, since then the result cannot be expressed as a product state
+of single qubit vectors. \\
 
 
-    // Possible functions on 1 bit
-    let f0 (n:int) = 
-        if n = 0 then 0
-        else 0
+Following is the code for Deutsch's Algorithm.
 
-    let f1 (n:int) = 
-        if n = 0 then 0
-        else 1
+\pagebreak
 
-    let f2 (n:int) = 
-        if n = 0 then 1
-        else 0
-
-    let f3 (n:int) = 
-        if n = 0 then 1
-        else 1
-
-    //This is a gate definition for Uf. 
-    let Uf (qs:Qubits) f = 
-        if (f 0) = 0 && (f 1) = 0 then 
-            I qs
-        elif (f 0) = 0 && (f 1) = 1 then
-            CNOT qs
-        elif (f 0) = 1 && (f 1) = 0 then           
-            let gate = 
-                new Gate(
-                    Name = "Uf",
-                    Help = "Unitary to apply a function f",
-                    Mat = ( CSMat(4, [(0,1,1.,0.); (1,0,1.,0.);
-                                            (2,2,1.,0.); (3,3,1.,0.)])),
-                    Draw = "\\ctrl{#1}\\go[#1]\\targ"
-                    )
-            gate.Run qs
-        elif (f 0) = 1 && (f 1) = 1 then
-            let gate = 
-                new Gate(
-                    Name = "Uf",
-                    Help = "Unitary to apply a function f",
-                    Mat = ( CSMat(4, [(0,1,1.,0.); (1,0,1.,0.);
-                                            (3,2,1.,0.); (2,3,1.,0.)])),
-                    Draw = "\\ctrl{#1}\\go[#1]\\targ"
-                    )
-            gate.Run qs
-   
-
+\begin{lstlisting}
     [<LQD>]
     let deutsch() =
-        logOpen "deutsch_test.log" false
-      
-        let qt = QubitTimer()
-        
-        //Create a 2 qubit vector
-        let ket = Ket(2)
-        qt.Show "Created 2 qubits"
-        
-        //Get list of qubits in the vector
-        let qs = ket.Qubits
+    logOpen "deutsch_test.log" false
 
-        //Initialize second qubit to 1
-        (ket.Item 1).StateSet(0.,0.,1.,0.)
+    let qt = QubitTimer()
 
-        //The >< operator applies the hadamard gate to all qubits in the list qs
-        H >< qs
-        qt.Show("Step 1 - Hadamard both qubits", qs.Length)
-        for q in qs do show "q[%d]=it equals%s" q.Id (q.ToString())
+    //Create a 2 qubit vector
+    let ket = Ket(2)
+    qt.Show "Created 2 qubits"
 
-        //Apply the oracle for the function f 
-        //Pass f0, f1, f2, or f3 to test different functions
-        Uf qs f2
+    //Get list of qubits in the vector
+    let qs = ket.Qubits
 
-        qt.Show("Step 2 - Apply Uf", qs.Length)
-        for q in qs do show "q[%d]=it equals%s" q.Id (q.ToString())
+    //Initialize second qubit to 1
+    (ket.Item 1).StateSet(0.,0.,1.,0.)
 
-        qt.Show("Step 3 - Apply hadamard to first qubit")
-        H qs
-        for q in qs do show "q[%d]=it equals%s" q.Id (q.ToString())
-        
-        qt.Show("Step 4 - Measure first qubit")
-        M qs
+    //The >< operator applies the hadamard gate to all qubits in the list qs
+    H >< qs
+    qt.Show("Step 1 - Hadamard both qubits", qs.Length)
+    for q in qs do show "q[%d]=%s" q.Id (q.ToString())
 
-        for q in qs do show "q[%d]=it equals%s" q.Id (q.ToString())
+    //Apply the oracle for the function f
+    //Pass f0, f1, f2, or f3 to test different functions
+    Uf qs f3
 
-    [<LQD>]
-    let Entangle1(entSiz:int) =
-        logOpen "Liquid.log" false
+    qt.Show("Step 2 - Apply Uf", qs.Length)
+    for q in qs do show "q[%d]=%s" q.Id (q.ShowMag())
 
-        let qt      = QubitTimer()
+    qt.Show("Step 3 - Apply hadamard to first qubit")
+    H qs
+    for q in qs do show "q[%d]=%s" q.Id (q.ToString())
 
-        let ket     = Ket(entSiz)                           // Start with a full sized state vector
-        let _       = ket.Single()
-        qt.Show "Created single state vector"
+    qt.Show("Step 4 - Measure first qubit")
+    M qs
 
-        let qs      = ket.Qubits
-        H qs                                                // Hadamard the first qubit
-        qt.Show "Did Hadamard"
+    for q in qs do show "q[%d]=%s" q.Id (q.ToString())
+\end{lstlisting}
 
-        let q0  = qs.Head
-        for i in 1..qs.Length-1 do
-            let q   = qs.[i]
-            CNOT[q0;q]                                      // Entangle all the other qubits
-            let str = sprintf "  Did CNOT: %2d" i
-            qt.Show(str,i,(i=qs.Length-1))
+First a Ket object is created. This represents a 2-qubit state vector. Next, the
+second qubit is set to the state $\ket{1}$, since this is necessary for Deutch's algorithm.\\
 
-        M >< qs                                             // Measure all the qubits
-        qt.Show("Did Measure",qs.Length)
-        show ""
+The first gate applied is the hadamard gate, to both qubits. In Liquid, gates are applied
+as functions which take qubit lists as arguments. The hadamard gate is built-in as the function $H$.\\
 
-    [<LQD>]
-    let Entangle2(entSiz:int) =
-        let ops (qs:Qubits) =
-            H qs
-            let q0  = qs.Head
-            for i in 1..qs.Length-1 do CNOT !!(qs,0,i)
-            M >< qs                                         // Measure all the qubits
+Gate functions can be used in two ways. If $qs$ is a qubit list, calling $H qs$ will apply
+a hadamard gate to the first qubit. If we want to apply a gate to the entire list, we can use the
+$><$ operator: $H >< qs$. This will call $H q$ for every qubit $q$ in the list $qs$, and accomplishes
+the first step of Deutsch's algorithm. \\
 
-        let ket     = Ket(entSiz)                           // Start with a full sized state vector
-        let _       = ket.Single()
-        let qs      = ket.Qubits
+Next, we apply the $U_f$ gate to both qubits. We also pass one of the four functions $f: \{0,1\} \rightarrow \{0,1\}$,
+so that the proper gate can be constructed. \\
 
-        let qt      = QubitTimer()
-        ops qs
-        qt.Show "Straight function calls"
-
-        let qs      = ket.Reset(entSiz)
-        let _       = ket.Single()
-        let circ    = Circuit.Compile ops qs
-        qt.Show "Compile cost"
-        circ.Run qs
-        qt.Show "Compiled circuit run time"
-
-        let qs      = ket.Reset(entSiz)
-        let _       = ket.Single()
-        let circ2   = circ.GrowGates(ket)
-        qt.Show "Optimization cost"
-        circ2.Run qs
-        qt.Show "Optimized circuit run time"
-
-        show "Circuit dump (in Liquid.log):"
-        circ.Dump(showLogInd)
-        show "Optimized circuit:"
-        circ2.Dump(showLogInd)
-
-        circ.Fold().RenderHT("Entangle2raw")
-        circ2.Fold().RenderHT("Entangle2opt")
-
-#if INTERACTIVE
-do
-    Script.Entangle1(10)        // If interactive, then run the routine automatically
-    Script.Entangle2(10)
-#endif
-
-\end{verbatim}
+Lastly, a final hadamard gate is applied to the first qubit, and then it is measured. Measurement in Liquid is
+achieved by applying the built in gate $M$. Of course, this collapses the measured to qubit(s) to a classical state. \\
 
 
+
+Below is an example output for running our Deutch's implementation for a balanced function $f$.\\
+\includegraphics[scale=.45]{deutsch_screen} \\
+
+Liquid supports printing and logging information as scripts are run. In our Deutsch's example we output the state vector
+for each qubit after each gate is applied. The state vectors are output in bra-ket notation, unless the state is entangled,
+in which case the string "entangled" is displayed. \\
+
+Looking at the first qubit, at the end of the script, the state $\ket{0}$ has amplitude $0$,
+and the state $\ket{1}$ has amplitude $1$, as expected for a balanced function.
+\pagebreak
 
 \section{Quantum Programming Language Theory}
 
@@ -439,7 +404,7 @@ This is the main theoretical work for this report.
 We focused on the paper "A Lambda Calculus for Quantum Computation" for this,
 It is possible that there are other ways of creating an untyped quantum lambda calculus.
 We found this presentation to be rather elegant.
-When creating the quantum untyped lambda calculus from the previous section, we must satisfy many properties, including: 
+When creating the quantum untyped lambda calculus from the previous section, we must satisfy many properties, including:
 $$$$
 Our quantum untyped lambda calculus:
 $$$$
