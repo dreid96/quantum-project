@@ -360,21 +360,30 @@ and the state $\ket{1}$ has amplitude $1$, as expected for a balanced function.
 
 
 
-
-Preface and Overview of classical lambda calculi:
+$$$$
+{\huge Preface and Overview of classical lambda calculi:}
 $$$$
 
-We assume that the reader is familiar with basic formulation of lambda calculi as variables, abstractions, and applications,
-as well as the concept of a reduction strategy, and a value. Instead we wish to focus on the differences between lambda calculi, and what makes the quantum lambda calculus interesting or different.
 
 In the classical setting, various lambda calculi exist with different type systems.
 
 These can be divided into the untyped lambda calculus, and a large number of important typed lambda calculi.
 
+$$$$
+{
+\large Untyped lambda calculus:}
+$$$$
+
 The untyped lambda calculus is Turing complete: we can provide encodings of objects we care about in the form of terms in the untyped lambda calculus,
 and the computational power of the untyped lambda calculus allows us to map inputs to outputs in terms of these encodings in arbitrary computable ways.
 
 The problem with using untyped lambda calculi for computation lies in the great number of terms for which we cannot attach computational meaning, as well as the difficulty in reasoning about the behavior of programs, such as determining if they output a value of the form we are interested in.
+
+$$$$
+{
+\large Typed lambda calculi:}
+$$$$
+
 Typed lambda calculi, the basis for typed programming languages, address this by providing a mechanism for rejecting certain programs which have undesirable properties, the most common of which being terminating computation in a term which does not correspond to a valid output of the program.
 
 Type systems in general can do even more, and can verify more or less arbitrary properties of programs.
@@ -390,21 +399,25 @@ Either they start with a total language, which has only terminating programs, an
 
 In extreme cases, languages push the limits on Rice's theorem by allowing the programmer to assist the compiler in type checking programs by providing proofs that they are of the correct type.
 
+$$$$
+{
+\Huge Quantum lambda calculi:}
+$$$$
+
 
 We are interested in how this pictures relates to the quantum case.
 Before attempting to study quantum lambda calculi, however, we need to have a model of the untyped quantum lambda calculus.
 
 $$$$
-
-Quantum Lambda Calculus.
-
+{
+\large An Untyped Quantum lambda Calculus:}
 $$$$
 
 This is the main theoretical work for this report.
 We focused on the paper "A Lambda Calculus for Quantum Computation" for this,
 It is possible that there are other ways of creating an untyped quantum lambda calculus.
 We found this presentation to be rather elegant.
-When creating the quantum untyped lambda calculus from the previous section, we must satisfy many properties, including:
+When creating the quantum untyped lambda calculus from the previous section, we must satisfy many properties, including: 
 $$$$
 Our quantum untyped lambda calculus:
 $$$$
@@ -415,39 +428,55 @@ $$$$
 5) should not terminate in a superposition that isn't properly normalized$$$$
 $$$$
 
-There are a few more technical properties as well.
+There are a few more technical properties as well that we might care about.
 
 
-To see how this is done, we take a similar approach to the paper, starting with the classical untyped lambda calculus and then showing how to modify the calculus to satisfy the above properties.
-The paper has a lot of proofs for how these properties are satisfied, but we will simply provide an informal explanation.
-
-
-Since we start with the classical untyped lambda calculus, property 1 is satisfied, and while 2 is subjective it appears to be reasonably satisfied as well.
+Since we start with the classical untyped lambda calculus, property 1 is satisfied, and while 2 is subjective it appears to be reasonably satisfied as well. One complaint is that our calculus works by recording histories, which may be too wasteful of space.
 To achieve (3), we add any universal set of quantum primitives. For instance, the paper we examine suggests Rotation by $\pi/8$, H, and CNot.
 
-To achieve (4), every small-step in our computation consists in
+To achieve (4), we record histories of our computation. That is, every small-step in our computation consists in
 transforming lambda expression "h1; h2; ... hn; x" to "h1; h2; ... hn; x ; y" where y is the term we would obtain under standard reduction of x.
-That is, in addition to normalizing terms as we typically do in lambda calculus, we generate product states that repeatedly append lambda terms to represent the entire history of computation.
-
-Thus $\ket{H 0}$ becomes $1/\sqrt{2} (\ket{H 0; 0} + \ket{H 0; 1})$
-
+In other words, in addition to normalizing terms as we typically do in lambda calculus, we generate product states that repeatedly append lambda terms to represent the entire history of computation.
+$$$$
+While we will later modify this definition slightly, for now, our plan is for $\ket{H 0}$ to become $1/\sqrt{2} (\ket{H 0; 0} + \ket{H 0; 1})$
+$$$$
 
 Note that we now have invertibility, but adding histories causes problems with cancellation of terms with different histories.
 
-In particular, computing  $\ket{H (H 0)}$ does not result in 0. The issue when computing this value, is that we cannot cancel a term with H 1 in its history with one that has H 0 in the same position in its history. To fix this problem, a rather deep result is that the super position doesn't affect the structure of the computation: If we replace all 0 and 1 kets in the history with underscores, everything factors nicely, and $\ket{H (H 0)}$ evaluates to 0. The amazing thing about this is that everything is still invertible!
+In particular, computing  $\ket{H (H 0)}$ does not result in $\ket{0}$ in the computational register. The issue when computing this value, is that we cannot cancel a term with H 1 in its history with one that has H 0 in the same position in its history:
+ $\ket{H (H 0)}$ normalizes to $\dfrac{1}{2} \ket{H (H 0)} \bigotimes (\ket{H 0; 0} + \ket{H 0; 1} + \ket{H 1; 0} - \ket{H 1; 1})$
+
+ To fix this problem, a rather deep result is that the super position doesn't affect the structure of the computation: If we replace all 0 and 1 kets in the history with underscores, everything factors nicely, and $\ket{H (H 0)}$ evaluates to 0. The amazing thing about this is that everything is still invertible!
+$$$$
+$$$$
+{
+\Large Linearity:}
+$$$$
 $$$$
 
-The above represents the core ideas that allow the quantum lambda calculus to work.
-What remains is to introduce the idea of linearity. This is rather similar to classical case of linear logic, and I expect I may cover it again when examining the typed quantum lambda calculi (in particular, quantum logic is supposed to be similar to linear logic), so coverage here will brief. We need a mechanism for specifying which terms are linear, meaning they must be used exactly once, and which are non-linear, or classical, meaning they can be copied or discarded at will. We allow for terms to be linear or non-linear, and we allow for the argument to lambda abstractions to be linear or non-linear. What remains is a lot of technical details to show that linear terms aren't promoted to non-linear terms when they should not be. While some of this is interesting it's mostly tedious, so I will save any further coverage of linearity for later.
+Other than the potential inefficiency associated with copying histories, there is only one problem remaining with the above presentation.
+Any function that discards its argument loses information, and a function whose argument appears twice or more in its body can perform cloning.
+$$$$
+We need a mechanism for specifying which terms are linear, meaning they must be used exactly once, and which are non-linear, or classical, meaning they can be copied or discarded at will. We allow for terms to be linear or non-linear, and we allow for the argument to lambda abstractions to be linear or non-linear. What remains is a lot of technical details to show that linear terms aren't promoted to non-linear terms when they should not be, etc.
+$$$$
+We can think of linear terms as representing arbitrary quantum computation, while non-linear terms represent classical computation.
+One interesting question is whether this can be formulated in a non-conservative manner. That is, a calculus that allows linear terms to be promoted to non-linear terms exactly when they are classical. 
+$$$$
 
-
-Plan for the final:
+$$$$
+$$$$
+{
+\Large Plan for the final:}
+$$$$
+$$$$
 
 We have seen how the untyped classical lambda calculus can be translated into an untyped quantum lambda calculus.
 This is however, an extremely small result. What is really interesting is not that quantum computation can be formulated in terms of lambda calculi,
 but that we can create type systems for quantum lambda calculi.
 
 This is what will allow us ultimately (though far outside the scope of this project) to verify properties of quantum programs, and to search the space of quantum programs.
+
+We in particular are interested in the relationship between classical linearity and quantum computation.
 
 $$$$
 Curry Howard Correspondence
