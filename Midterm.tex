@@ -466,26 +466,35 @@ $$$$
 $$$$
 $$$$
 {
-\Large Plan for the final:}
+\Large Quantum Computing in Typed Languages:}
 $$$$
 $$$$
 
-We have seen how the untyped classical lambda calculus can be translated into an untyped quantum lambda calculus.
-This is however, an extremely small result. What is really interesting is not that quantum computation can be formulated in terms of lambda calculi,
-but that we can create type systems for quantum lambda calculi.
-
-This is what will allow us ultimately (though far outside the scope of this project) to verify properties of quantum programs, and to search the space of quantum programs.
-
-We in particular are interested in the relationship between classical linearity and quantum computation.
+As we have seen above, quantum programming languages can be achieved by taking a classical programming language,
+and adding a small set of quantum primitives, and then enforcing restrictions that avoid the violations of the no-cloning theorem, and potentially other restrictions that we may wish to enforce.
+$$$$
+Further, this appears to be the universal approach taken in developing type theory with quantum computation.
+As an example, while Liquid provides very limited documentation with regards to its type system,
+it appears to apply the above methodology starting with the Hindley Milner type system.
+$$$$
 
 $$$$
-Curry Howard Correspondence
 $$$$
-The curry howard correspondence is a relationship between logic and typed lambda calculi.
-In particular therefore, we are interested in quantum logic.
-Quantum logic is related to linear logic, so linear logic may come up in the final presentation due to its indirect connection to quantum type systems.
+{
+\large The Curry Howard Isomorphism and Future Work:}
+$$$$
+$$$$
 
+The Curry Howard Isomorphism is a relationship between programs and proofs.
+Namely, types are propositions, and programs are proofs.
 
+This correspondence applies to systems like the Hindley Milner type system, but only in trivial ways.
+More advanced classical programming languages which support dependent types allow the programmer to exploit the relationship between programs and proofs much more directly. While not the final word on type systems, they allow us to write formally verified programs.
+
+$$$$
+The next question I would like to answer, is whether it is possible to use the above strategy for dependent types:
+That is, can we take dependently typed systems, and very slightly change the type system to support qubits, and then
+produce formally verified quantum algorithms with essentially known tools and techniques from the classical setting?
 
 
 \end{document}
